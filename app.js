@@ -1,9 +1,17 @@
-let fetchPromise = fetch(
+const fetchPromise1 = fetch(
   "https://mdn.github.io/learning-area/javascript/apis/fetching-data/can-store/products.json"
 );
-console.log(fetchPromise);
+const fetchPromise2 = fetch(
+  "https://mdn.github.io/learning-area/javascript/apis/fetching-data/can-store/not-found"
+);
+const fetchPromise3 = fetch(
+  "https://mdn.github.io/learning-area/javascript/oojs/json/superheroes.json"
+);
 
-fetchPromise
-  .then((response) => response.json())
-  .then((data) => console.log(data))
+Promise.all([fetchPromise1, fetchPromise2, fetchPromise3])
+  .then((responses) => {
+    responses.forEach((response) => {
+      console.log(response.url, response.status);
+    });
+  })
   .catch((e) => console.log(e));
