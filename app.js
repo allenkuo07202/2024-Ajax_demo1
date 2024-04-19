@@ -1,32 +1,21 @@
-let max = 1000000;
+let fetchPromise = fetch(
+  "https://mdn.github.io/learning-area/javascript/apis/fetching-data/can-store/products.json"
+);
+console.log(fetchPromise);
 
-function isPrime(n) {
-  for (let i = 2; i <= Math.sqrt(n); i++) {
-    if (n % i == 0) {
-      return false;
-    }
-  }
+fetchPromise.then((response) => {
+  //   console.log(fetchPromise);
+  //   console.log(response);
 
-  return n > 1;
-}
-
-const random = (max) => Math.floor(Math.random() * max);
-
-function generatePrimes(quota) {
-  const primes = [];
-  while (primes.length < quota) {
-    const candidate = random(max);
-    if (isPrime(candidate)) {
-      primes.push(candidate);
-    }
-  }
-  return primes;
-}
-
-const output = document.querySelector("div#output");
-const button = document.querySelector("#generate");
-button.addEventListener("click", (e) => {
-  const quota = document.querySelector("#number");
-  const primes = generatePrimes(quota.value);
-  output.innerHTML = primes;
+  // response.json()將response內，文字的部分轉成JSON(JavaScript Object Notation)
+  // .json() method os also asynchronous function
+  // 所以它也會return Promise object
+  response.json().then((data) => {
+    console.log(data);
+  });
 });
+// 然而，上面的寫法會產生callback hell
+// 所以改寫如下：
+fetchPromise
+  .then((response) => response.json())
+  .then((data) => console.log(data));
