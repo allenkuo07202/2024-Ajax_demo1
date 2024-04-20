@@ -1,30 +1,44 @@
-console.log("start"); // sync
+let balance = 0; // shared resource
 
-process.nextTick(function () {
-  console.log("nextTick1");
-});
+const randomDelay = () => {
+  // return value is a Promise
+  // and the time for this promise changing from pending to fulfilled
+  // is random (0s-0.1s)
+  return new Promise((resolve) => setTimeout(resolve, Math.random() * 100));
+};
 
-setTimeout(function () {
-  console.log("setTimeout");
-}, 0);
-// call the constructor 是一個 sync function
-new Promise(function (resolve, reject) {
-  console.log("promise");
-  resolve("resolve");
-}).then(function (result) {
-  console.log("promise then");
-});
-// IIFE
-(async function () {
-  console.log("async");
-})();
+async function loadBalance() {
+  // 模擬查詢銀行帳戶，要跟伺服器連線，須要一點時間
+  await randomDelay(); // 等個隨機的0s~0.1s
+  return balance;
+}
 
-setImmediate(function () {
-  console.log("setImmediate");
-});
+async function saveBalance(value) {
+  // 模擬存入銀行帳戶，要跟伺服器連線，須要一點時間
+  await randomDelay();
+  balance = value;
+}
 
-process.nextTick(function () {
-  console.log("nextTick2");
-});
+async function sellGrapes() {
+  const balance = await loadBalance();
+  // 本來loadBalance()是return一個Promise，但我們有用await，所以會直接return balance
+  console.log(`賣葡萄前，帳戶金額為${balance}`);
+  const newBalance = balance + 50;
+  await saveBalance(newBalance);
+  console.log(`賣葡萄後，帳戶金額為${newBalance}`);
+}
 
-console.log("end");
+async function sellOlives() {
+  const balance = await loadBalance();
+  console.log(`賣橄欖前，帳戶金額為${balance}`);
+  const newBalance = balance + 50;
+  await saveBalance(newBalance);
+  console.log(`賣橄欖後，帳戶金額為${newBalance}`);
+}
+
+async function main() {
+  await Promise.all([sellGrapes(), sellOlives()]);
+  const balance = await loadBalance();
+  console.log(`賣葡萄與橄欖後的帳戶金額是${balance}`);
+}
+main();
