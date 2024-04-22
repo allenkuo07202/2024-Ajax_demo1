@@ -1,61 +1,69 @@
-let balance = 0; // shared resource
-let mutex = Promise.resolve(); // return a fulfilled promise
-// 一開始就要return a fulfilled promise的原因是
-// 第一次執行mutex.then()的時候，我們就要直接執行then後面的程式碼
+const name = document.querySelector("#name");
+const delay = document.querySelector("#delay");
+const button = document.querySelector("#set-alarm");
+const output = document.querySelector("#output");
 
-const randomDelay = () => {
-  // return value is a Promise
-  // and the time for this promise changing from pending to fulfilled
-  // is random (0s-0.1s)
-  return new Promise((resolve) => setTimeout(resolve, Math.random() * 100));
-};
-
-async function loadBalance() {
-  // 模擬查詢銀行帳戶，要跟伺服器連線，須要一點時間
-  await randomDelay(); // 等個隨機的0s~0.1s
-  return balance;
+// 法1：以前的作法
+function alarm(person, delay) {
+  setTimeout(() => {
+    output.innerHTML = person + "起床！";
+  }, delay);
 }
 
-async function saveBalance(value) {
-  // 模擬存入銀行帳戶，要跟伺服器連線，須要一點時間
-  await randomDelay();
-  balance = value;
-}
+button.addEventListener("click", (e) => {
+  alarm(name.value, delay.value);
+});
 
-async function sellGrapes() {
-  mutex = mutex.then(async () => {
-    const balance = await loadBalance();
-    // 本來loadBalance()是return一個Promise，但我們有用await，所以會直接return balance
-    console.log(`賣葡萄前，帳戶金額為${balance}`);
-    const newBalance = balance + 50;
-    await saveBalance(newBalance);
-    console.log(`賣葡萄後，帳戶金額為${newBalance}`);
+// 法2：用promise的作法
+// return Promise object
+// pending的delay秒之後，state要變成fulfilled(執行resolve時)
+// 若delay < 0，state要變成rejected(執行reject時)
+function alarm(person, delay) {
+  return new Promise((resolve, reject) => {
+    if (delay < 0) {
+      reject("delay不能小於0");
+    } else {
+      setTimeout(() => {
+        resolve(person + "起床！");
+      }, delay);
+    }
   });
-  return mutex; // 因為async function要return一個Promise，所以在這裡return mutex
 }
 
-async function sellOlives() {
-  mutex = mutex.then(async () => {
-    const balance = await loadBalance();
-    console.log(`賣橄欖前，帳戶金額為${balance}`);
-    const newBalance = balance + 50;
-    await saveBalance(newBalance);
-    console.log(`賣橄欖後，帳戶金額為${newBalance}`);
+button.addEventListener("click", (e) => {
+  let promiseObject = alarm(name.value, delay.value);
+  promiseObject
+    .then((message) => {
+      output.innerHTML = message;
+    })
+    .catch((e) => {
+      output.innerHTML = e;
+    });
+});
+
+// 法3：用promise的作法&async funtion
+// return Promise object
+// pending的delay秒之後，state要變成fulfilled(執行resolve時)
+// 若delay < 0，state要變成rejected(執行reject時)
+function alarm(person, delay) {
+  return new Promise((resolve, reject) => {
+    if (delay < 0) {
+      reject("delay不能小於0");
+    } else {
+      setTimeout(() => {
+        resolve(person + "起床！");
+      }, delay);
+    }
   });
-  return mutex;
 }
 
-async function main() {
-  await Promise.all([
-    sellGrapes(),
-    sellOlives(),
-    sellOlives(),
-    sellOlives(),
-    sellGrapes(),
-    sellGrapes(),
-    sellGrapes(),
-  ]);
-  const balance = await loadBalance();
-  console.log(`賣葡萄與橄欖後的帳戶金額是${balance}`);
-}
-main();
+button.addEventListener("click", async () => {
+  try {
+    let result = await alarm(name.value, delay.value);
+    output.innerHTML = result;
+  } catch (e) {
+    output.innerHTML = e;
+  }
+});
+
+// 以上其實就是(自己作的)Promise Based API
