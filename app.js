@@ -1,18 +1,16 @@
-let button = document.querySelector("#new-joke");
-let output = document.querySelector("#output");
-async function hello() {
+let myKey = "11eb20771a1f64879b6ff924e7b9af5c";
+let city = "Taipei";
+
+let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${myKey}`;
+
+async function weather() {
   try {
-    let result = await fetch(
-      "https://v2.jokeapi.dev/joke/Programming?type=single"
-    );
+    let result = await fetch(url);
     let data = await result.json();
-    output.innerText += data.joke + "\n";
-    // console.log(data);
+    console.log(data);
   } catch (e) {
     console.log(e);
   }
 }
 
-button.addEventListener("click", (e) => {
-  hello();
-});
+weather();
